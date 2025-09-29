@@ -1,0 +1,122 @@
+---
+title: "R Notebook"
+author: "Gabriella Dixon"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tinytex)
+library(dplyr)
+library(tidyverse)
+set.seed(123)
+```
+
+# Question 1 - Su_raw_matrix.txt
+```{r}
+# (a) Read file Su_raw_matrix.txt into data frame su
+su <- read.delim('/Users/18136/RWorkspace/Su_raw_matrix.txt')
+
+# (b) Find the mean of Liver_2.CEL in data frame su by column index
+mean(su[,8])
+
+# (b) Find the mean of Liver_2.CEL in data frame su by column name
+mean(su$Liver_2.CEL)
+
+# (c) Find the sd of Liver_2.CEL in data frame su by column index
+sd(su[,8])
+
+# (c) Find the sd of Liver_2.CEL in data frame su by column name
+sd(su$Liver_2.CEL)
+
+# (d) Find the average of each column
+colMeans(su)
+
+# (e) Find the sum of each column
+colSums(su)
+```
+
+# Question 2 - Generate Random Numbers and Histograms
+```{r}
+# (a) Generate 10000 numbers, mean=0, sigma=0.2
+hista <- rnorm(10000, mean = 0, sd = 0.2)
+hist(hista, xlim = c(-5,5))
+
+# (b) Generate 10000 numbers, mean=0, sigma=0.5
+histb <- rnorm(10000, mean = 0, sd = 0.5)
+hist(histb, xlim = c(-5,5))
+```
+
+# Question 3 - ggplot2 Visualizations
+```{r}
+dat <- data.frame(cond = factor(rep(c("A","B"), each=200)),
+                  rating = c(rnorm(200), rnorm(200, mean = 0.8)))
+
+# (b) Overlaid histograms
+ggplot(dat, aes(x = rating, fill = cond)) +
+  geom_histogram(binwidth = .5, alpha = .5, position = "identity")
+
+# (c) Interleaved histograms
+ggplot(dat, aes(x = rating, fill = cond)) +
+  geom_histogram(binwidth = .5, position = "dodge")
+
+# (d) Density plots (color)
+ggplot(dat, aes(x = rating, colour = cond)) + geom_density()
+
+# (e) Density plots (fill)
+ggplot(dat, aes(x = rating, fill = cond)) + geom_density(alpha = .3)
+
+# (f) Apply to diabetes_train.csv
+diabetes <- read.csv('/Users/18136/RWorkspace/diabetes_train.csv')
+if("class" %in% names(diabetes)) diabetes$class <- as.factor(diabetes$class)
+
+ggplot(diabetes, aes(x = mass, fill = class)) +
+  geom_histogram(binwidth = 2, alpha = 0.5, position = "identity")
+```
+
+# Question 4 - Titanic Data with dplyr
+```{r}
+passengers <- read.csv('/Users/18136/RWorkspace/titanic.csv')
+
+# (a) drop_na + summary
+passengers %>% drop_na() %>% summary()
+
+# (b) filter males
+passengers %>% filter(Sex == "male") %>% head()
+
+# (c) arrange fares
+passengers %>% arrange(desc(Fare)) %>% head(10)
+
+# (d) mutate family size
+passengers %>% mutate(FamSize = Parch + SibSp) %>% head()
+
+# (e) group_by sex
+passengers %>%
+  group_by(Sex) %>%
+  summarise(meanFare = mean(Fare, na.rm=TRUE),
+            numSurv = sum(Survived, na.rm=TRUE),
+            count = n())
+```
+
+# Question 5 - Quantiles
+```{r}
+quantile(diabetes$skin, probs = c(0.10, 0.30, 0.50, 0.60), na.rm = TRUE)
+```
+
