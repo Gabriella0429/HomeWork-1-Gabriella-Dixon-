@@ -1,0 +1,71 @@
+# General Setup
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tinytex)
+library(dplyr)
+library(tidyverse)
+set.seed(123)
+
+# Question 1 - Su_raw_matrix.txt
+su <- read.delim('/Users/18136/RWorkspace/Su_raw_matrix.txt')
+mean(su[,8])
+mean(su$Liver_2.CEL)
+sd(su[,8])
+sd(su$Liver_2.CEL)
+colMeans(su)
+colSums(su)
+
+# Question 2 - Generate Random Numbers and Histograms
+hista <- rnorm(10000, mean = 0, sd = 0.2)
+hist(hista, xlim = c(-5,5))
+histb <- rnorm(10000, mean = 0, sd = 0.5)
+hist(histb, xlim = c(-5,5))
+
+# Question 3 - ggplot2 Visualizations
+dat <- data.frame(cond = factor(rep(c("A","B"), each=200)),
+                  rating = c(rnorm(200), rnorm(200, mean = 0.8)))
+
+# Overlaid histograms
+ggplot(dat, aes(x = rating, fill = cond)) +
+  geom_histogram(binwidth = .5, alpha = .5, position = "identity")
+
+# Interleaved histograms
+ggplot(dat, aes(x = rating, fill = cond)) +
+  geom_histogram(binwidth = .5, position = "dodge")
+
+# Density plots (color)
+ggplot(dat, aes(x = rating, colour = cond)) + geom_density()
+
+# Density plots (fill)
+ggplot(dat, aes(x = rating, fill = cond)) + geom_density(alpha = .3)
+
+# Apply to diabetes_train.csv
+diabetes <- read.csv('/Users/18136/RWorkspace/diabetes_train.csv')
+if("class" %in% names(diabetes)) diabetes$class <- as.factor(diabetes$class)
+ggplot(diabetes, aes(x = mass, fill = class)) +
+  geom_histogram(binwidth = 2, alpha = 0.5, position = "identity")
+
+# Question 4 - Titanic Data with dplyr
+passengers <- read.csv('/Users/18136/RWorkspace/titanic.csv')
+
+# drop_na + summary
+passengers %>% drop_na() %>% summary()
+
+# filter males
+passengers %>% filter(Sex == "male") %>% head()
+
+# arrange fares
+passengers %>% arrange(desc(Fare)) %>% head(10)
+
+# mutate family size
+passengers %>% mutate(FamSize = Parch + SibSp) %>% head()
+
+# group_by sex
+passengers %>%
+  group_by(Sex) %>%
+  summarise(meanFare = mean(Fare, na.rm=TRUE),
+            numSurv = sum(Survived, na.rm=TRUE),
+            count = n())
+
+# Question 5 - Quantiles
+quantile(diabetes$skin, probs = c(0.10, 0.30, 0.50, 0.60), na.rm = TRUE)
